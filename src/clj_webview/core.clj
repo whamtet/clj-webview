@@ -9,6 +9,7 @@
 (import javafx.concurrent.Worker$State)
 (import WebUIController)
 
+;;launch calls the fxml which in turn loads WebUIController
 (defonce launch (future (Application/launch hk.molloy.Browser (make-array String 0))))
 
 (defmacro run-later [& forms]
@@ -26,11 +27,6 @@
                        (Thread/sleep 1000)
                        WebUIController/engine
                        #_@(run-later (.getEngine (WebView.)))))
-
-#_(defonce webengine (do
-                     (future (webviewsample.WebViewSample/main (make-array String 0)))
-                     (Thread/sleep 5000)
-                     webviewsample.WebViewSample/webengine))
 
 (defn execute-script [s]
   (run-later
@@ -102,7 +98,7 @@
     @p
     ))
 
-(while true
+#_(while true
     (async-load url)
     (execute-script-async (slurp "js-src/hack.js"))
     )

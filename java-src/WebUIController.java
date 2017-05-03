@@ -24,7 +24,7 @@ public class WebUIController implements Initializable {
 
     @FXML
     private void goAction(ActionEvent evt) {
-        webEngine.load(txtURL.getText().startsWith("http://") ? txtURL.getText() : "http://" + txtURL.getText());
+        webEngine.load(txtURL.getText().startsWith("http") ? txtURL.getText() : "http://" + txtURL.getText());
     }
 
     @Override
