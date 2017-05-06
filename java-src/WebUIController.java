@@ -21,6 +21,7 @@ public class WebUIController implements Initializable {
     WebView webView;
     private WebEngine webEngine;
     public static WebEngine engine;
+    public static WebView view;
 
     @FXML
     private void goAction(ActionEvent evt) {
@@ -32,6 +33,7 @@ public class WebUIController implements Initializable {
 
         webEngine = webView.getEngine();
         engine = webEngine;
+        view = webView;
         webEngine.locationProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {

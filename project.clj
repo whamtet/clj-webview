@@ -10,4 +10,5 @@
   ;:repositories [["xx" "http://maven.teamdev.com/repository/products"]]
   :java-source-paths ["java-src"]
   :aot [clj-webview.browser]
+  :jvm-opts ["-Dfile.encoding=UTF8"]
   )

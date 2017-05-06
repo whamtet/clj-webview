@@ -8,6 +8,7 @@
 (import javafx.beans.value.ChangeListener)
 (import javafx.concurrent.Worker$State)
 (import WebUIController)
+(import MyEventDispatcher)
 
 ;;launch calls the fxml which in turn loads WebUIController
 (defonce launch (future (Application/launch hk.molloy.Browser (make-array String 0))))
@@ -24,9 +25,11 @@
 (def url "https://app.sli.do/event/dhsnnxay/ask")
 
 (defonce webengine (do
-                       (Thread/sleep 1000)
-                       WebUIController/engine
-                       #_@(run-later (.getEngine (WebView.)))))
+                     (Thread/sleep 1000)
+                     WebUIController/engine
+                     #_@(run-later (.getEngine (WebView.)))))
+
+(def webview WebUIController/view)
 
 (defn execute-script [s]
   (run-later
@@ -82,13 +85,15 @@
          listener (reify ChangeListener
                     (changed [this observable old-value new-value]
                              (when (= new-value Worker$State/SUCCEEDED)
+                               ;first remove this listener
                                (.removeListener observable this)
+                               ;and then redefine log and error (fresh page)
                                (bind "println" f)
                                (future
                                  (Thread/sleep 1000)
                                  (execute-script "console.log = function(s) {println.invoke(s)};
-                                               console.error = function(s) {println.invoke(s)};
-                                               "))
+                                                 console.error = function(s) {println.invoke(s)};
+                                                 "))
                                (deliver p true))))
          ]
     (run-later
@@ -98,7 +103,24 @@
     @p
     ))
 
-#_(while true
-    (async-load url)
-    (execute-script-async (slurp "js-src/hack.js"))
-    )
+(defn back []
+  (execute-script "window.history.back()"))
+
+;over riding URL handlers
+(import sun.net.www.protocol.http.Handler)
+(import sun.net.www.protocol.http.HttpURLConnection)
+(import java.net.URL)
+(import java.net.URLStreamHandler)
+(import java.net.URLStreamHandlerFactory)
+(import java.net.URLStreamHandler)
+
+(defn my-connection-handler [protocol]
+  (proxy [Handler] []
+    (openConnection [& [url proxy :as args]]
+                    (println args)
+                    #_(HttpURLConnection. url proxy))))
+
+(defonce stream-handler-factory
+  (URL/setURLStreamHandlerFactory
+    (reify URLStreamHandlerFactory
+      (createURLStreamHandler [this protocol] (#'my-connection-handler protocol)))))
